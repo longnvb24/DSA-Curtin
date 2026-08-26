@@ -1,3 +1,4 @@
+# reference: Prac_3/act_1.py
 from act_1 import DSALinkedList
 
 class DSAStack:
@@ -45,7 +46,7 @@ assert q.dequeue() == "A"
 assert q.dequeue() == "B"
 assert q.dequeue() == "C"
 assert q.isEmpty() == True
-print("PASS: DSAQueue is FIFO")
+print("PASS: DSAQueue")
 
 s = DSAStack()
 s.push("A")
@@ -53,4 +54,4 @@ s.push("B")
 assert s.pop() == "B"
 assert s.pop() == "A"
 assert s.isEmpty() == True
-print("PASS: DSAStack is LIFO")
+print("PASS: DSAStack")
