@@ -1,7 +1,29 @@
 from act_1 import DSAStack, DSAQueue
 
+
+def parseTerms(equation):
+    terms = DSAQueue(len(equation) + 1)
+    number = ""
+
+    for ch in equation:
+        if ch == '+' or ch == '-' or ch == '*' or ch == '/' \
+                or ch == '(' or ch == ')' or ch == ' ':
+            if number != "":                       # the number ends here
+                terms.enqueue(number)
+                number = ""
+            if ch != ' ':
+                terms.enqueue(ch)
+        else:
+            number = number + ch                   # still inside a number
+
+    if number != "":                               # the equation may end on one
+        terms.enqueue(number)
+
+    return terms
+
+
 def precedenceOf(theOp):
-    """Return precedence of operator: + - returns 1, * / returns 2."""
+    """+ and - give 1, * and / give 2."""
     if theOp == '+' or theOp == '-':
         return 1
     elif theOp == '*' or theOp == '/':
@@ -10,169 +32,91 @@ def precedenceOf(theOp):
         raise Exception(f"Unknown operator: {theOp}")
 
 
-def isNumber(token):
-    """Return True if the token is a valid number (int or float)."""
-    try:
-        float(token)
-        return True
-    except ValueError:
-        return False
+def executeOperation(op, op1, op2):
+    """Do the binary operation op on op1 and op2."""
+    if op == '+':
+        return op1 + op2
+    elif op == '-':
+        return op1 - op2
+    elif op == '*':
+        return op1 * op2
+    elif op == '/':
+        return op1 / op2
+    else:
+        raise Exception(f"Unknown operator: {op}")
 
 
 def parseInfixToPostfix(equation):
-    """Convert infix expression to postfix queue.
-    Stack holds operators, queue holds the postfix result."""
-    if equation is None or equation.strip() == "":
-        raise ValueError("Empty expression. Please enter something.")
+    """Infix -> postfix queue."""
+    terms = parseTerms(equation)
+    opStack = DSAStack(terms.count + 1)
+    postfixQueue = DSAQueue(terms.count + 1)
 
-    opStack = DSAStack(100)
-    postfixQueue = DSAQueue(100)
+    while not terms.isEmpty():
+        term = terms.dequeue()
 
-    for token in equation.split():
-        c = token
+        if term == '(':
+            opStack.push(term)                     # '(' goes straight on
 
-        if c == '(':
-            # (: Push onto stack
-            opStack.push(c)
-
-        elif c == ')':
-            # ): Pop from stack until '(' is encountered
-            while not opStack.isEmpty() and opStack.peek() != '(':
+        elif term == ')':
+            while opStack.peek() != '(':           # pop the sub-equation
                 postfixQueue.enqueue(opStack.pop())
-            if opStack.isEmpty():
-                raise ValueError("Unbalanced parentheses: extra ')'")
-            opStack.pop()                  # remove '(' from stack, do not enqueue
+            opStack.pop()                          # drop the '('
 
-        elif c == '+' or c == '-' or c == '*' or c == '/':
-            # Pop operators from stack with precedence >= current operator
-            while (not opStack.isEmpty()
-                   and opStack.peek() != '('
-                   and precedenceOf(opStack.peek()) >= precedenceOf(c)):
+        elif term == '+' or term == '-' or term == '*' or term == '/':
+            while (not opStack.isEmpty() and opStack.peek() != '('
+                   and precedenceOf(opStack.peek()) >= precedenceOf(term)):
                 postfixQueue.enqueue(opStack.pop())
-            opStack.push(c)
-
-        elif isNumber(c):
-            # Number
-            postfixQueue.enqueue(float(c))
+            opStack.push(term)                     # always push the new operator
 
         else:
-            # Not a number, not an operator, not a bracket -> invalid input
-            raise ValueError(
-                f"Invalid token '{token}'. Only numbers, + - * / and ( ) are allowed, "
-                f"separated by spaces."
-            )
+            postfixQueue.enqueue(float(term))      # the term is an operand
 
-    # No more tokens: pop remaining operators from stack to queue
-    while not opStack.isEmpty():
+    while not opStack.isEmpty():                   # pop what is left
         op = opStack.pop()
         if op == '(':
-            raise ValueError("Unbalanced parentheses: missing ')'")
+            raise Exception("A '(' has no matching ')'")
         postfixQueue.enqueue(op)
 
     return postfixQueue
 
 
-def executeOperation(op, op1, op2):
-    """Execute the operation op on operands op1 and op2."""
-    if op == '+':
-        result = op1 + op2
-    elif op == '-':
-        result = op1 - op2
-    elif op == '*':
-        result = op1 * op2
-    elif op == '/':
-        if op2 == 0:
-            raise ZeroDivisionError("Cannot divide by zero")
-        result = op1 / op2
-    else:
-        raise Exception(f"Unknown operator: {op}")
-    return result
-
-
 def evaluatePostfix(postfixQueue):
-    """Evaluate the postfix queue. This stack holds numbers."""
-    operandStack = DSAStack(100)
+    """Evaluate the postfix queue. This time the stack holds the operands."""
+    operandStack = DSAStack(postfixQueue.count + 1)
 
     while not postfixQueue.isEmpty():
-        token = postfixQueue.dequeue()
+        term = postfixQueue.dequeue()
 
-        if isinstance(token, str):
-            # Operator: pop two operands, compute, and push result back
-            if operandStack.count < 2:
-                raise ValueError(f"Invalid expression: operator '{token}' is missing operand(s)")
-            op2 = operandStack.pop()       # pop first -> right operand
-            op1 = operandStack.pop()       # pop second -> left operand
-            operandStack.push(executeOperation(token, op1, op2))
+        if term == '+' or term == '-' or term == '*' or term == '/':
+            op2 = operandStack.pop()               # popped first  -> right
+            op1 = operandStack.pop()               # popped second -> left
+            operandStack.push(executeOperation(term, op1, op2))
         else:
-            # Number: push onto stack
-            operandStack.push(token)
+            operandStack.push(term)
 
-    if operandStack.isEmpty():
-        raise ValueError("Invalid expression: no result")
-    result = operandStack.pop()
-    if not operandStack.isEmpty():
-        raise Exception("Invalid expression: extra operand(s) left")
-    return result
+    return operandStack.pop()
 
 
 def solve(equation):
-    """Solve the infix expression and return the result as a float."""
-    postfixQueue = parseInfixToPostfix(equation)
-    return evaluatePostfix(postfixQueue)
-
-
-def showQueue(q):
-    """Display the contents of the queue on the screen (used for debugging the parsing steps)."""
-    text = ""
-    for i in range(q.count):
-        text = text + str(q.data[i]) + " "
-    return text.strip()
-
-
-def readEquation(prompt="Enter an expression (or 'q' to quit): "):
-    """Keep asking until the user types a valid expression.
-    Returns the equation string, or None if the user wants to quit."""
-    while True:
-        equation = input(prompt).strip()
-
-        if equation.lower() in ("q", "quit", "exit"):
-            return None
-
-        try:
-            # Try parsing + evaluating. If it works, the input is valid.
-            solve(equation)
-            return equation
-        except ZeroDivisionError as e:
-            print(f"  Error: {e}. Please try again.\n")
-        except ValueError as e:
-            print(f"  Invalid input: {e}\n")
-        except Exception as e:
-            print(f"  Invalid expression: {e}\n")
+    """Parse to postfix, then evaluate."""
+    return evaluatePostfix(parseInfixToPostfix(equation))
 
 
 if __name__ == "__main__":
-    equations = [
-        "3 + 4 * 2",
-        "( 3 + 4 ) * 2",
-        "5 - 3",
-        "10 - 2 - 3",
-        "20 / 4 / 5",
-        "( 1 + 2 ) * ( 3 + 4 )",
-        "3.5 * 2",
-    ]
+    print("Spaces are optional, e.g.  (10.3*(14+3.2))/(5+2-4*3)")
 
-    print("Demo cases:")
-    for eq in equations:
-        postfix = showQueue(parseInfixToPostfix(eq))
-        print(f"{eq:24} -> {postfix:26} = {solve(eq)}")
+    equation = input("\nEquation (or 'q' to quit): ")
+    while equation != "q":
+        try:
+            postfixQueue = parseInfixToPostfix(equation)
 
-    print("\nOr try by yourself:")
-    print("Separate every token with a space, e.g.  ( 3 + 4 ) * 2")
-    while True:
-        equation = readEquation()
-        if equation is None:
-            print("Bye!")
-            break
-        postfix = showQueue(parseInfixToPostfix(equation))
-        print(f"  Postfix: {postfix}")
-        print(f"  Result : {solve(equation)}\n")
+            postfix = ""                           # check the parsing first
+            for i in range(postfixQueue.count):
+                postfix = postfix + str(postfixQueue.data[i]) + " "
+
+            print(f"  Postfix: {postfix}")
+            print(f"  Result : {evaluatePostfix(postfixQueue)}")
+        except Exception as e:
+            print(f"  Error: {e}")
+        equation = input("\nEquation (or 'q' to quit): ")

@@ -65,7 +65,7 @@ class DSALinkedList:
         if self.isEmpty():
             raise ValueError("List is empty")
         nodeValue = self.tail.data
-        if self.tail.prev is None: # list only have 1 element
+        if self.tail.prev is None: # the list has only 1 element
             self.head = None
             self.tail = None
         else:
@@ -108,3 +108,49 @@ class DSALinkedList:
                 return True
             currNd = currNd.next
         return False
+
+# test harness code
+if __name__ == "__main__":
+    print("\nTesting DSALinkedList")
+    myList = DSALinkedList()
+    print("Is list empty? ->", myList.isEmpty())
+
+    print("\nTesting insertFirst and insertLast")
+    myList.insertFirst(10)
+    myList.insertLast(30)
+    myList.insertFirst(5)
+    print("Peek First ->", myList.peekFirst()) # Expect: 5
+    print("Peek Last ->", myList.peekLast())   # Expect: 30
+
+    print("\nTesting insertBefore")
+    myList.insertBefore(30, 20)
+    print("Find value 20? ->", myList.find(20)) # Expect: True
+
+    print("\nTesting removals")
+    val_first = myList.removeFirst()
+    print("Removed First ->", val_first)       # Expect: 5
+    
+    val_last = myList.removeLast()
+    print("Removed Last ->", val_last)         # Expect: 30
+    
+    val_mid = myList.removeValue(20)
+    print("Removed Value 20 ->", val_mid)      # Expect: 20
+
+    print("\nTesting remaining state")
+    print("Peek First ->", myList.peekFirst()) # Expect: 10
+    print("Is list empty? ->", myList.isEmpty()) # Expect: False
+
+    print("\nTesting exceptions (Error handling)")
+    try:
+        print("Trying to find and remove a non-existent value (999)...")
+        myList.removeValue(999)
+    except ValueError as e:
+        print("Caught expected error ->", e)
+
+    # Test removing all elements to empty the list
+    myList.removeFirst()
+    try:
+        print("Trying to remove from an empty list...")
+        myList.removeFirst()
+    except ValueError as e:
+        print("Caught expected error ->", e)

@@ -1,14 +1,5 @@
 from act_1 import DSALinkedList
 
-def displayMenu():
-    print("\n--- DSALinkedList Menu ---")
-    print("1. Insert First")
-    print("2. Insert Last")
-    print("3. Remove First")
-    print("4. Remove Last")
-    print("5. Display list")
-    print("0. Quit")
-
 def getMenuChoice():
     choice = -1
     valid = False
@@ -37,7 +28,10 @@ def main():
     myList = DSALinkedList()
     choice = -1
     while choice != 0:
-        displayMenu()
+        print("\nDSALinkedList Menu")
+        print("1. Insert First   2. Insert Last")
+        print("3. Remove First   4. Remove Last")
+        print("5. Display list   0. Quit")
         choice = getMenuChoice()
 
         if choice == 1:

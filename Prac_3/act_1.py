@@ -4,16 +4,15 @@ class DSAStack:
     """Last In First Out."""
 
     def __init__(self, capacity=100):
-        if capacity <= 0:
-            raise ValueError("capacity must be > 0")
         self.data = np.empty(capacity, dtype=object)
+        self.capacity = capacity
         self.count = 0
 
     def isEmpty(self):
         return self.count == 0
 
     def isFull(self):
-        return self.count == len(self.data)
+        return self.count == self.capacity
 
     def push(self, value):
         if self.isFull():
@@ -24,10 +23,8 @@ class DSAStack:
     def pop(self):
         if self.isEmpty():
             raise Exception("Stack is empty")
-        top_val = self.data[self.count - 1]
-        self.data[self.count - 1] = None
         self.count -= 1
-        return top_val
+        return self.data[self.count]
 
     def peek(self):
         if self.isEmpty():
@@ -36,19 +33,18 @@ class DSAStack:
 
 
 class DSAQueue:
-    """First In First Out (shuffling queue)."""
+    """First In First Out (shuffling)."""
 
     def __init__(self, capacity=100):
-        if capacity <= 0:
-            raise ValueError("capacity must be > 0")
         self.data = np.empty(capacity, dtype=object)
+        self.capacity = capacity
         self.count = 0
 
     def isEmpty(self):
         return self.count == 0
 
     def isFull(self):
-        return self.count == len(self.data)
+        return self.count == self.capacity
 
     def enqueue(self, value):
         if self.isFull():
@@ -59,150 +55,53 @@ class DSAQueue:
     def dequeue(self):
         if self.isEmpty():
             raise Exception("Queue is empty")
-        front_val = self.data[0]
-        for i in range(1, self.count):
+        frontVal = self.data[0]
+        for i in range(1, self.count):        # shuffle the rest down
             self.data[i - 1] = self.data[i]
         self.count -= 1
-        self.data[self.count] = None
-        return front_val
+        return frontVal
 
     def peek(self):
         if self.isEmpty():
             raise Exception("Queue is empty")
         return self.data[0]
 
-def displayStack(stack):
-    """Return the stack contents (bottom -> top)"""
-    if stack.isEmpty():
-        return "(empty)"
+
+def display(adt):
     text = ""
-    for i in range(stack.count):
-        text = text + str(stack.data[i]) + " "
-    return text.strip() + "  <- top"
+    for i in range(adt.count):
+        text = text + str(adt.data[i]) + " "
+    return text
 
 
-def displayQueue(queue):
-    """Return the queue contents (front -> rear)"""
-    if queue.isEmpty():
-        return "(empty)"
-    text = ""
-    for i in range(queue.count):
-        text = text + str(queue.data[i]) + " "
-    return "front -> " + text.strip() + " <- rear"
-
-
-def readInt(prompt, low, high):
-    while True:
-        try:
-            value = int(input(prompt).strip())
-        except ValueError:
-            print("That is not a whole number. Please try again.")
-            continue
-        if low <= value <= high:
-            return value
-        print(f"Please enter a number between {low} and {high}.")
-
-
-def readValue(prompt):
-    """Read a non-empty value. Numbers are stored as numbers, the rest as text."""
-    while True:
-        text = input(prompt).strip()
-        if text == "":
-            print("The value cannot be empty. Please try again.")
-            continue
-        try:
-            return int(text)
-        except ValueError:
-            pass
-        try:
-            return float(text)
-        except ValueError:
-            pass
-        return text
-
-
-def stackMenu():
-    """Interactive menu for the stack."""
-    capacity = readInt("Stack capacity (1-100): ", 1, 100)
-    stack = DSAStack(capacity)
-
-    while True:
-        print("\nDSAStack (LIFO)")
-        print(f"Contents: {displayStack(stack)}")
-        print(f"Size    : {stack.count}/{capacity}")
-        print("1. Push")
-        print("2. Pop")
-        print("3. Peek")
-        print("4. isEmpty / isFull")
-        print("0. Back to the main menu")
-        choice = readInt("Choose an option: ", 0, 4)
-
-        if choice == 0:
-            break
-
+def menu(adt, addName, removeName, add, remove):
+    choice = -1
+    while choice != 0:
+        print(f"\nContents: {display(adt)} ({adt.count}/{adt.capacity})")
+        print(f"1. {addName}   2. {removeName}   3. Peek   4. isEmpty / isFull   0. Back")
+        choice = int(input("Option: "))
         try:
             if choice == 1:
-                value = readValue("Value to push: ")
-                stack.push(value)
-                print(f"  Pushed {value}.")
+                add(input("Value: "))
             elif choice == 2:
-                print(f"  Popped {stack.pop()}.")
+                print(f"  Removed {remove()}")
             elif choice == 3:
-                print(f"  Top of the stack is {stack.peek()}.")
+                print(f"  Front/top is {adt.peek()}")
             elif choice == 4:
-                print(f"  isEmpty = {stack.isEmpty()}, isFull = {stack.isFull()}")
-        except Exception as e:
-            print(f"  Error: {e}")
-
-
-def queueMenu():
-    """Interactive menu for the queue."""
-    capacity = readInt("Queue capacity (1-100): ", 1, 100)
-    queue = DSAQueue(capacity)
-
-    while True:
-        print("\nDSAQueue (FIFO)")
-        print(f"Contents: {displayQueue(queue)}")
-        print(f"Size    : {queue.count}/{capacity}")
-        print("1. Enqueue")
-        print("2. Dequeue")
-        print("3. Peek")
-        print("4. isEmpty / isFull")
-        print("0. Back to the main menu")
-        choice = readInt("Choose an option: ", 0, 4)
-
-        if choice == 0:
-            break
-
-        try:
-            if choice == 1:
-                value = readValue("Value to enqueue: ")
-                queue.enqueue(value)
-                print(f"  Enqueued {value}.")
-            elif choice == 2:
-                print(f"  Dequeued {queue.dequeue()}.")
-            elif choice == 3:
-                print(f"  Front of the queue is {queue.peek()}.")
-            elif choice == 4:
-                print(f"  isEmpty = {queue.isEmpty()}, isFull = {queue.isFull()}")
+                print(f"  isEmpty = {adt.isEmpty()}, isFull = {adt.isFull()}")
         except Exception as e:
             print(f"  Error: {e}")
 
 
 if __name__ == "__main__":
-    print("Activity 1: Stack and Queue")
-
-    while True:
-        print("\nMain menu")
-        print("1. Stack  (Last In First Out)")
-        print("2. Queue  (First In First Out)")
-        print("0. Quit")
-        option = readInt("Choose an option: ", 0, 2)
+    option = -1
+    while option != 0:
+        print("\n1. DSAStack   2. DSAQueue   0. Quit")
+        option = int(input("Option: "))
 
         if option == 1:
-            stackMenu()
+            stack = DSAStack(int(input("Capacity: ")))
+            menu(stack, "Push", "Pop", stack.push, stack.pop)
         elif option == 2:
-            queueMenu()
-        else:
-            print("Bye!")
-            break
+            queue = DSAQueue(int(input("Capacity: ")))
+            menu(queue, "Enqueue", "Dequeue", queue.enqueue, queue.dequeue)

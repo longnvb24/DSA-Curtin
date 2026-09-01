@@ -1,150 +1,95 @@
 import numpy as np
 
 class DSAQueue:
-    '''
-    First in first out
-    '''
-    def __init__(self, capacity = 100):
-        if capacity <= 0:
-            raise ValueError("capacity must be > 0")
+    def __init__(self, capacity=100):
         self.data = np.empty(capacity, dtype=object)
-        self.count = 0
         self.capacity = capacity
+        self.count = 0
+        self.front = 0
 
     def isEmpty(self):
         return self.count == 0
-        
+
     def isFull(self):
-        return self.count == len(self.data)
+        return self.count == self.capacity
+
 
 class ShufflingQueue(DSAQueue):
-    def enqueue(self,value):
+    def enqueue(self, value):
         if self.isFull():
-            raise Exception('The array is full')
+            raise Exception("Queue is full")
         self.data[self.count] = value
         self.count += 1
 
     def dequeue(self):
         if self.isEmpty():
-            raise Exception('The array is empty')
-        front_val = self.data[0]
+            raise Exception("Queue is empty")
+        frontVal = self.data[0]
         for i in range(1, self.count):
-            self.data[i-1] = self.data[i]
+            self.data[i - 1] = self.data[i]
         self.count -= 1
-        return front_val
+        self.data[self.count] = None
+        return frontVal
 
     def peek(self):
         if self.isEmpty():
             raise Exception("Queue is empty")
         return self.data[0]
 
+
 class CircularQueue(DSAQueue):
     def __init__(self, capacity=100):
         super().__init__(capacity)
-        self.front = 0
         self.rear = -1
 
     def enqueue(self, value):
         if self.isFull():
-            raise Exception('The array is full')
+            raise Exception("Queue is full")
         self.rear = (self.rear + 1) % self.capacity
         self.data[self.rear] = value
         self.count += 1
 
     def dequeue(self):
         if self.isEmpty():
-            raise Exception('The array is empty')
-        front_val = self.data[self.front]
+            raise Exception("Queue is empty")
+        frontVal = self.data[self.front]
+        self.data[self.front] = None
         self.front = (self.front + 1) % self.capacity
         self.count -= 1
-        return front_val
+        return frontVal
 
     def peek(self):
         if self.isEmpty():
             raise Exception("Queue is empty")
         return self.data[self.front]
 
-
-def displayQueue(queue):
-    """Return the queue contents as text (front -> rear)"""
-    if queue.isEmpty():
-        return "(empty)"
-    start = getattr(queue, "front", 0)
+def display(queue):
     text = ""
-    for i in range(queue.count):
-        text = text + str(queue.data[(start + i) % queue.capacity]) + " "
-    return "front -> " + text.strip() + " <- rear"
-
+    for i in range(queue.capacity):
+        if queue.data[i] is not None:
+            text = text + str(queue.data[i]) + " "
+    return text
 
 def displayArray(queue):
-    """Return the raw array slots"""
+    """The raw slots, to show how the two queues differ."""
     text = ""
     for i in range(queue.capacity):
         text = text + f"[{i}]{queue.data[i]} "
-    return text.strip()
+    return text
 
-
-def readInt(prompt, low, high):
-    value = None
-    while value is None:
-        text = input(prompt).strip()
-        try:
-            number = int(text)
-            if low <= number <= high:
-                value = number
-            else:
-                print(f"  Please enter a number between {low} and {high}.")
-        except ValueError:
-            print("  That is not a whole number. Please try again.")
-    return value
-
-
-def readValue(prompt):
-    value = None
-    while value is None:
-        text = input(prompt).strip()
-        if text == "":
-            print("  The value cannot be empty. Please try again.")
-        else:
-            try:
-                value = int(text)
-            except ValueError:
-                try:
-                    value = float(text)
-                except ValueError:
-                    value = text
-    return value
-
-
-def queueMenu(queueClass):
-    """Interactive menu for one kind of queue."""
-    capacity = readInt("Queue capacity (1-100): ", 1, 100)
-    queue = queueClass(capacity)
-
+def menu(queue):
     choice = -1
     while choice != 0:
-        print(f"\n{queueClass.__name__}")
-        print(f"Contents: {displayQueue(queue)}")
-        print(f"Size    : {queue.count}/{capacity}")
-        if isinstance(queue, CircularQueue):
-            print(f"Indexes : front = {queue.front}, rear = {queue.rear}")
-        print("1. Enqueue")
-        print("2. Dequeue")
-        print("3. Peek")
-        print("4. isEmpty / isFull")
-        print("5. Show the raw array")
-        print("0. Back to the main menu")
-        choice = readInt("Choose an option: ", 0, 5)
-
+        print(f"\nContents: {display(queue)} ({queue.count}/{queue.capacity})")
+        print("1. Enqueue   2. Dequeue   3. Peek   4. isEmpty / isFull   5. Raw array   0. Back")
+        choice = int(input("Option: "))
         try:
             if choice == 1:
-                value = readValue("Value to enqueue: ")
-                queue.enqueue(value)
-                print(f"  Enqueued {value}.")
+                queue.enqueue(input("Value: "))
             elif choice == 2:
-                print(f"  Dequeued {queue.dequeue()}.")
+                print(f"  Dequeued {queue.dequeue()}")
             elif choice == 3:
-                print(f"  Front of the queue is {queue.peek()}.")
+                print(f"  Front is {queue.peek()}")
             elif choice == 4:
                 print(f"  isEmpty = {queue.isEmpty()}, isFull = {queue.isFull()}")
             elif choice == 5:
@@ -152,21 +97,13 @@ def queueMenu(queueClass):
         except Exception as e:
             print(f"  Error: {e}")
 
-
 if __name__ == "__main__":
-    print("Shuffling and Circular Queue")
-
     option = -1
     while option != 0:
-        print("\nMain menu")
-        print("1. ShufflingQueue")
-        print("2. CircularQueue")
-        print("0. Quit")
-        option = readInt("Choose an option: ", 0, 2)
+        print("\n1. ShufflingQueue   2. CircularQueue   0. Quit")
+        option = int(input("Option: "))
 
         if option == 1:
-            queueMenu(ShufflingQueue)
+            menu(ShufflingQueue(int(input("Capacity: "))))
         elif option == 2:
-            queueMenu(CircularQueue)
-        else:
-            print("Bye!")
+            menu(CircularQueue(int(input("Capacity: "))))
