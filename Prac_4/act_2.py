@@ -1,4 +1,4 @@
-# reference: Prac_3/act_1.py
+# reference: Practical_3/act_1.py
 from act_1 import DSALinkedList
 
 class DSAStack:
