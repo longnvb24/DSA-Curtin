@@ -72,6 +72,27 @@ class DSABinarySearchTree:
 
         return updateNode
 
+    def min(self):
+        return self.minRec(self.root)
+
+    def minRec(self, cur):
+        if cur.getLeft() != None:          # not base case
+            minKey = self.minRec(cur.getLeft())   # recursive call
+        else:
+            minKey = cur.getKey()
+        return minKey
+
+
+    def max(self):
+        return self.maxRec(self.root)
+
+    def maxRec(self, cur):
+        if cur.getRight() != None:         # not base case
+            maxKey = self.maxRec(cur.getRight())  # recursive call
+        else:
+            maxKey = cur.getKey()
+        return maxKey
+
 if __name__ == "__main__":
     bst = DSABinarySearchTree()
     bst.insert(10, "Ten")
@@ -81,6 +102,9 @@ if __name__ == "__main__":
     print(bst.find(10))  # Output: Ten
     print(bst.find(5))   # Output: Five
     print(bst.find(15))  # Output: Fifteen
+
+    print(bst.min())  # Output: 5
+    print(bst.max())  # Output: 15
 
     try:
         print(bst.find(20))  # This will raise an exception
