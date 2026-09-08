@@ -72,6 +72,46 @@ class DSABinarySearchTree:
 
         return updateNode
 
+    def min(self):
+        if self.root == None:
+            raise ValueError("Tree is empty")
+        return self.minRec(self.root)
+
+    def minRec(self, cur):
+        if cur.getLeft() != None:          # not base case
+            minKey = self.minRec(cur.getLeft())   # recursive call
+        else:
+            minKey = cur.getKey()
+        return minKey
+
+    def max(self):
+        if self.root == None:
+            raise ValueError("Tree is empty")
+        return self.maxRec(self.root)
+
+    def maxRec(self, cur):
+        if cur.getRight() != None:         # not base case
+            maxKey = self.maxRec(cur.getRight())  # recursive call
+        else:
+            maxKey = cur.getKey()
+        return maxKey
+
+    def height(self):
+        return self.heightRec(self.root)
+
+    def heightRec(self, cur):
+        if cur == None:                    # base case - no more along this branch
+            htSoFar = -1
+        else:
+            leftHt = self.heightRec(cur.getLeft())    # calc left height
+            rightHt = self.heightRec(cur.getRight())  # calc right height
+
+            if leftHt > rightHt:           # get highest of left vs right branches
+                htSoFar = leftHt + 1
+            else:
+                htSoFar = rightHt + 1
+        return htSoFar
+
 if __name__ == "__main__":
     bst = DSABinarySearchTree()
     bst.insert(10, "Ten")
@@ -82,6 +122,9 @@ if __name__ == "__main__":
     print(bst.find(5))   # Output: Five
     print(bst.find(15))  # Output: Fifteen
 
+    print(bst.min())  # Output: 5
+    print(bst.max())  # Output: 15
+    print(bst.height())  # Output: 1
     try:
         print(bst.find(20))  # This will raise an exception
     except ValueError as e:
