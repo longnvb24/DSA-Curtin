@@ -6,8 +6,8 @@ class DSATreeNode:
         self.rightChild = None
 
     def __str__(self):
-        return ("Key: " + str(self.key) + " Value: "+ str(self.value))
-    
+        return f"Key: {self.key} Value: {self.value}"
+
     def getKey(self):
         return self.key
 
@@ -25,9 +25,28 @@ class DSATreeNode:
 
     def setRight(self, newRight):
         self.rightChild = newRight
-# class DSABinarySearchTree:
 
-if __name__ == "__main__":
-    print("Testing node creation")
-    myNode = DSATreeNode(1, "one")
-    print(myNode)
+class DSABinarySearchTree:
+    def __init__(self):
+        self.root = None
+
+    # wrapper methods, will call recursive implementations
+
+    def find(self, key):
+        return self.findRec(key, self.root)
+
+    def findRec(self, key, cur):
+        value = None
+
+        if cur == None: # Base case: not found
+            raise ValueError(f"Key {key} not found")
+        
+        elif key == cur.key: # Base case: found
+            value = cur.value
+
+        elif key < cur.key: # Go left (recursive)
+            value = self.findRec(key, cur.leftChild)
+
+        else: # Go right(recursive)
+            value = self.findRec(key, cur.rightChild)
+        return value
