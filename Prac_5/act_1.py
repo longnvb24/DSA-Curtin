@@ -50,3 +50,39 @@ class DSABinarySearchTree:
         else: # Go right(recursive)
             value = self.findRec(key, cur.rightChild)
         return value
+
+    def insert(self, key, value):
+        self.root = self.insertRec(key, value, self.root)
+
+    def insertRec(self, key, value, cur):
+        updateNode = cur
+
+        if cur == None: # base case: found insertion point
+            newNode = DSATreeNode(key, value)
+            updateNode = newNode
+
+        elif key == cur.getKey(): # key already in the tree -> abort
+            raise ValueError(f"Key {key} already exists")
+
+        elif key < cur.getKey(): # recurse left
+            cur.setLeft(self.insertRec(key, value, cur.getLeft()))
+
+        else:                    # recurse right
+            cur.setRight(self.insertRec(key, value, cur.getRight()))
+
+        return updateNode
+
+if __name__ == "__main__":
+    bst = DSABinarySearchTree()
+    bst.insert(10, "Ten")
+    bst.insert(5, "Five")
+    bst.insert(15, "Fifteen")
+
+    print(bst.find(10))  # Output: Ten
+    print(bst.find(5))   # Output: Five
+    print(bst.find(15))  # Output: Fifteen
+
+    try:
+        print(bst.find(20))  # This will raise an exception
+    except ValueError as e:
+        print(e)  # Output: Key 20 not found
